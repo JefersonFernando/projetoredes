@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.ImageInput?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="589.0" prefWidth="408.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Control.GUIController">
+   <children>
+      <Pane prefHeight="589.0" prefWidth="408.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <TextArea editable="false" prefHeight="589.0" prefWidth="408.0">
+               <effect>
+                  <ImageInput>
+                     <source>
+                        <Image url="@background.png" />
+                     </source>
+                  </ImageInput>
+               </effect>
+            </TextArea>
+            <Circle fx:id="conectionStatus" fill="RED" layoutX="254.0" layoutY="78.0" radius="16.0" stroke="BLACK" strokeType="INSIDE" />
+            <Label layoutX="135.0" layoutY="62.0" text="STATUS:">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <Label layoutX="129.0" layoutY="14.0" prefHeight="35.0" prefWidth="174.0" text="FILE TRANSFER " textAlignment="CENTER">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Button fx:id="onOffButton" layoutX="157.0" layoutY="306.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="106.0" text="Ligar/Desligar" />
+            <ChoiceBox fx:id="selector" layoutX="156.0" layoutY="110.0" onAction="#conectionChanged" prefHeight="25.0" prefWidth="97.0" />
+            <Label layoutX="151.0" layoutY="151.0" prefHeight="17.0" prefWidth="25.0" text="IP">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <TextField fx:id="ipField" layoutX="146.0" layoutY="178.0" prefHeight="25.0" prefWidth="126.0" />
+            <Label layoutX="147.0" layoutY="222.0" text="PORT">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <TextField fx:id="portField" layoutX="147.0" layoutY="249.0" prefHeight="25.0" prefWidth="126.0" />
+            <Button fx:id="sendButton" layoutX="157.0" layoutY="366.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="106.0" text="Enviar Arquivo" />
+            <Circle fx:id="sendError" fill="RED" layoutX="295.0" layoutY="381.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
+            <ProgressIndicator fx:id="sendIndicator" layoutX="270.0" layoutY="371.0" progress="0.0" />
+            <TextField fx:id="receiveRequest" editable="false" layoutX="65.0" layoutY="448.0" prefHeight="25.0" prefWidth="291.0" />
+            <Button fx:id="acceptButton" layoutX="65.0" layoutY="483.0" mnemonicParsing="false" text="Aceitar" />
+            <Button fx:id="rejectButton" layoutX="131.0" layoutY="483.0" mnemonicParsing="false" text="Recusar" />
+            <Circle fx:id="receiveError" fill="RED" layoutX="222.0" layoutY="496.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
+            <ProgressIndicator fx:id="receiveIndicator" layoutX="197.0" layoutY="483.0" progress="0.0" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
