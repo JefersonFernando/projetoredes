@@ -44,6 +44,7 @@ public class Commands{
     
     private Commands(){
         commands = new HashMap<>();
+        commands.put(OptionCommands.START, StartCommand.getInstance());
     }
     
     public static Commands getInstance(){

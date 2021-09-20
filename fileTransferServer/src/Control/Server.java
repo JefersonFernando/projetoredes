@@ -7,40 +7,42 @@ package Control;
 
 import java.io.*;
 import java.net.*;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.nio.channels.*;
 
 /**
  *
  * @author jefer
  */
-public final class Client implements Runnable{
+public final class Server implements Runnable{
     
-    private static Client instance = null;
-    private SocketChannel socket = null;
+    private static Server instance = null;
+    private ServerSocket socket = null;
+    private Socket client = null;
     private int port;
     private String ip;
     
     private final BlockingQueue<byte[]> queue;
     
-    private ClientReceiver receiver = null;
-    private ClientSender sender = null;
+    private ServerReceiver receiver = null;
+    private ServerSender sender = null;
     
     private boolean exit = false;
     
     private GUIController interfaceController = null;
     
-    private Client(){
+    private Server(){
         queue = new ArrayBlockingQueue<>(10);
-        receiver = ClientReceiver.getInstance();
-        sender = ClientSender.getInstance();
+        receiver = ServerReceiver.getInstance();
+        sender = ServerSender.getInstance();
+        receiver.setServer(this);
+        sender.setServer(this);
     }
     
-    public static Client getInstance(){
+    public static Server getInstance(){
         if(instance == null){
-            instance = new Client();
+            instance = new Server();
         }
         return instance;
     }
@@ -73,7 +75,7 @@ public final class Client implements Runnable{
     
     public boolean isConnected(){
         if(socket != null){
-            return socket.isConnected();
+            return client.isConnected();
         }
         return false;
     }
@@ -91,62 +93,67 @@ public final class Client implements Runnable{
         
         port = interfaceController.getPort();
         
-        if("-".equals(ip) || port == -1){
+        if(port == -1){
             exit = true;
-            interruptClient();
+            interruptServer();
         }
         
         if(!exit){
             try{
-                socket = SocketChannel.open();
-                socket.configureBlocking(false);
+                socket = new ServerSocket(port);
+                socket.setSoTimeout(50);
+                Thread.sleep(100);
+                ip = InetAddress.getLocalHost().getHostAddress().trim();
+                
+                String systemIp = "-";
+                
+                try{
+                    URL url = new URL("http://bot.whatismyipaddress.com");
+                    
+                    BufferedReader sc = new BufferedReader(new InputStreamReader(url.openStream()));
+                    
+                    systemIp = sc.readLine().trim();
+                }catch (Exception e){
+                    systemIp = "-";
+                }
+                
+                interfaceController.ipField.clear();
+                interfaceController.ipField.appendText(ip + "/" + systemIp);
 
-            } catch(IOException e){
+            } catch(InterruptedException | IOException e){
                 exit = true;
-                interruptClient();
+                interruptServer();
             }
         }
         
-        if(!exit && !socket.isConnectionPending()){
+        while( (!exit) && client == null ){
             try{
-                socket.connect(new InetSocketAddress(ip, port));
-            }catch(IOException | IllegalArgumentException e){
-                exit = true;
-                interruptClient();
-            }
-        }else{
-            exit = true;
-            interruptClient();
-        }
-        
-        while( (!exit) && (!socket.isConnected())){
-            try{
-                socket.finishConnect();
+                client = socket.accept();
                 Thread.sleep(50);
+            }catch(SocketTimeoutException e){
             }catch(InterruptedException | IOException e){
                 exit = true;
-                interruptClient();
+                interruptServer();
             }
         }
         
-        if(!exit && socket.isConnected()){
-            receiver.setSocket(socket);
-            sender.setSocket(socket);
+        if(!exit && client.isConnected()){
+            receiver.setSocket(client);
+            sender.setSocket(client);
             sender.setQueue(queue);
             
             new Thread(receiver).start();
             new Thread(sender).start();
             
             interfaceController.connectedStatus();
-            
         }else{
-            interruptClient();
+            interruptServer();
         }
         
         exit = true;
     }
     
-    public void stopClient(){
+    public void stopServer(){
         try{
             
             exit = true;
@@ -161,11 +168,16 @@ public final class Client implements Runnable{
             
             Thread.sleep(100);
             
+            if(client != null){
+                client.close();
+            }
+            
             if(socket != null){
                 socket.close();
             }
             
             socket = null;
+            client = null;
             
             queue.clear();
             
@@ -198,7 +210,7 @@ public final class Client implements Runnable{
         }
     }
     
-    public void interruptClient(){
+    public void interruptServer(){
         interfaceController.connectionOff();
         exit = true;
     }

@@ -10,7 +10,10 @@ package Control;
  * @author jefer
  */
 public abstract class BasicCommand {
-    private Client client;
+    protected Client client;
+    protected Server server;
+    
+    abstract void setInterfaceController(GUIController controller);
     
     abstract void process(byte[] bytes);
     

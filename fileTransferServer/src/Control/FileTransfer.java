@@ -17,7 +17,7 @@ import javafx.event.EventHandler;
  *
  * @author jefer
  */
-public class FileTransferMain extends Application{
+public class FileTransfer extends Application{
     
     private static Stage stage;
     private static Scene mainMenuScene;
@@ -37,6 +37,10 @@ public class FileTransferMain extends Application{
         
             @Override
             public void handle(WindowEvent we){
+                Client client = Client.getInstance();
+                Server server = Server.getInstance();
+                server.stopServer();
+                client.stopClient();
             }
         });
     }

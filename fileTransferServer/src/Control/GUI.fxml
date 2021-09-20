@@ -37,21 +37,21 @@
                   <Font size="24.0" />
                </font>
             </Label>
-            <Button fx:id="onOffButton" layoutX="157.0" layoutY="306.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="106.0" text="Ligar/Desligar" />
+            <Button fx:id="onOffButton" layoutX="157.0" layoutY="306.0" mnemonicParsing="false" onAction="#handeOnOffButton" prefHeight="49.0" prefWidth="106.0" text="Ligar/Desligar" />
             <ChoiceBox fx:id="selector" layoutX="156.0" layoutY="110.0" onAction="#conectionChanged" prefHeight="25.0" prefWidth="97.0" />
-            <Label layoutX="151.0" layoutY="151.0" prefHeight="17.0" prefWidth="25.0" text="IP">
+            <Label layoutX="198.0" layoutY="151.0" prefHeight="17.0" prefWidth="25.0" text="IP">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <TextField fx:id="ipField" layoutX="146.0" layoutY="178.0" prefHeight="25.0" prefWidth="126.0" />
-            <Label layoutX="147.0" layoutY="222.0" text="PORT">
+            <TextField fx:id="ipField" alignment="CENTER" layoutX="118.0" layoutY="178.0" prefHeight="25.0" prefWidth="186.0" />
+            <Label layoutX="182.0" layoutY="222.0" text="PORT">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <TextField fx:id="portField" layoutX="147.0" layoutY="249.0" prefHeight="25.0" prefWidth="126.0" />
-            <Button fx:id="sendButton" layoutX="157.0" layoutY="366.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="106.0" text="Enviar Arquivo" />
+            <TextField fx:id="portField" layoutX="160.0" layoutY="249.0" prefHeight="25.0" prefWidth="90.0" />
+            <Button fx:id="sendButton" layoutX="157.0" layoutY="366.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="106.0" text="Enviar Arquivo" onAction="#handleSendButton" />
             <Circle fx:id="sendError" fill="RED" layoutX="295.0" layoutY="381.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
             <ProgressIndicator fx:id="sendIndicator" layoutX="270.0" layoutY="371.0" progress="0.0" />
             <TextField fx:id="receiveRequest" editable="false" layoutX="65.0" layoutY="448.0" prefHeight="25.0" prefWidth="291.0" />

@@ -5,8 +5,7 @@
  */
 package Control;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import java.net.*;
 import java.util.Map;
 import java.io.*;
 
@@ -14,35 +13,47 @@ import java.io.*;
  *
  * @author jefer
  */
-public final class ClientReceiver implements Runnable{
+public final class ServerReceiver implements Runnable{
     
-    private static ClientReceiver instance = null;
+    private Server server = null;
+    private static ServerReceiver instance = null;
     private volatile boolean exit = false;
-    private SocketChannel socket = null;
+    private Socket socket = null;
+    private InputStream input = null;
     
     private Map<OptionCommands, Commands> commands;
     
-    private ClientReceiver(){
+    private ServerReceiver(){
     }
     
-    public static ClientReceiver getInstance(){
+    public void setServer(Server server){
+        this.server = server;
+    }
+    
+    public static ServerReceiver getInstance(){
         if(instance == null){
-            instance = new ClientReceiver();
+            instance = new ServerReceiver();
         }
         return instance;
     }
     
-    public void setSocket(SocketChannel socket){
+    public void setSocket(Socket socket){
         this.socket = socket;
+        if(socket != null){
+            try{
+                input = socket.getInputStream();
+            } catch (IOException e){
+                exit = true;
+                server.interruptServer();
+            }
+        }
     }
     
     @Override
     public void run(){
         exit = false;
-        Client client = Client.getInstance();
-        ByteBuffer buff = ByteBuffer.allocate(65536);
         byte[] data2 = new byte[65536];
-        byte[] data;
+        byte[] data = new byte[65536];
         int size, crc;
         
         Commands manager = Commands.getInstance();
@@ -51,14 +62,13 @@ public final class ClientReceiver implements Runnable{
         
         while(!exit){
             try{
-                receivedBytes = socket.read(buff);
+                
+                receivedBytes = input.read(data);
                 
                 if(receivedBytes > 0){
-                    data = buff.array();
-                    buff.clear();
                     
-                    size = ((data[0] & 0xFF) << 8);
-                    size = (size | (data[1] & 0xFF));
+                    size = (data[0] & 0xFF) << 8;
+                    size = size | (data[1] & 0xFF);
                     
                     if(size > 0){
                         
@@ -70,7 +80,7 @@ public final class ClientReceiver implements Runnable{
                             data2[i] = '\0';
                         }
                         
-                        crc = client.CRC16(data, size-2);
+                        crc = server.CRC16(data, size-2);
                         
                         crcValue = data[size - 2] & 0xFF;
                         crcValue = crcValue << 8;
@@ -82,22 +92,30 @@ public final class ClientReceiver implements Runnable{
                             //TODO: criar else.
                         }
                     }else{
-                        client.interruptClient();
+                        server.interruptServer();
                         exit = true;
                     }
                 }else if (receivedBytes < 0 || !socket.isConnected()){
-                    client.interruptClient();
+                    server.interruptServer();
                     exit = true;
                 }
-                Thread.sleep(50);
-            }catch( InterruptedException | IOException e){
-                client.interruptClient();
+            Thread.sleep(50);
+                
+            }catch(InterruptedException | IOException e){
                 exit = true;
+                server.interruptServer();
             }
         }
     }
     
     public void stopThread(){
+        if(input != null){
+            try{
+                input.close();
+            } catch ( IOException e){
+            }
+        }
+        input = null;
         socket = null;
         exit = true;
     }

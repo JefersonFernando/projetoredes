@@ -6,7 +6,7 @@
 package Control;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import java.net.*;
 import java.util.concurrent.BlockingQueue;
 import java.io.*;
 
@@ -14,28 +14,42 @@ import java.io.*;
  *
  * @author jefer
  */
-public final class ClientSender implements Runnable{
+public final class ServerSender implements Runnable{
     
-    private static ClientSender instance = null;
+    private static ServerSender instance = null;
     private volatile boolean exit = false;      /** Indica se a thread será encerrada. **/
-    private SocketChannel socket = null;        /** OutputStream para enviar dados. **/
+    private Socket socket = null;        /** OutputStream para enviar dados. **/
+    private OutputStream output;
     private  BlockingQueue<byte[]> queue;       /** Fila bloqueante para tratar o envio dos dados. **/
+    private Server server = null;
 
     /**
      * @brief Construtor do Sender.
     */    
-    private ClientSender(){
+    private ServerSender(){
     }
     
-    public static ClientSender getInstance(){
+    public void setServer(Server server){
+        this.server = server;
+    }
+    
+    public static ServerSender getInstance(){
         if(instance == null){
-            instance = new ClientSender();
+            instance = new ServerSender();
         }
         return instance;
     }
     
-    public void setSocket(SocketChannel socket){
+    public void setSocket(Socket socket){
         this.socket = socket;
+        if(socket != null){
+            try{
+                output = socket.getOutputStream();
+            } catch (IOException e){
+                exit = true;
+                server.interruptServer();
+            }
+        }
     }
     
     public void setQueue(BlockingQueue<byte[]> q){
@@ -49,34 +63,29 @@ public final class ClientSender implements Runnable{
     public void run(){
         ByteBuffer buf = ByteBuffer.allocate(65536);
         exit = false;
-        Client client = Client.getInstance();
         byte[] data;
+        int err;
         while(!exit){
             try{
-                if(!queue.isEmpty()){
+                if(queue != null && !queue.isEmpty()){
+                    
                     data = this.queue.take();
-                    buf.clear();
-                    buf.put(data);
-                    buf.flip();
-                    while(buf.hasRemaining()){
-                        socket.write(buf);
-                    }
-                    buf.clear();
+                    output.write(data);
                 }
                 Thread.sleep(50);
             }catch(InterruptedException|IOException e){
-                client.interruptClient();
                 exit = true;
-            }   
+                server.interruptServer();
+            }
         }
-    }
+    } 
     
     /**
      * @brief Para a thread.
     */   
     public void stopThread(){
+        this.exit = true;
         queue = null;
         socket = null;
-        this.exit = true;
     }
 }
