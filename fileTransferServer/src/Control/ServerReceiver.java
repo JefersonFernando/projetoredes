@@ -54,10 +54,8 @@ public final class ServerReceiver implements Runnable{
         exit = false;
         byte[] data2 = new byte[65536];
         byte[] data = new byte[65536];
-        int size, crc;
         
         Commands manager = Commands.getInstance();
-        long crcValue;
         int receivedBytes;
         
         while(!exit){
@@ -66,35 +64,17 @@ public final class ServerReceiver implements Runnable{
                 receivedBytes = input.read(data);
                 
                 if(receivedBytes > 0){
-                    
-                    size = (data[0] & 0xFF) << 8;
-                    size = size | (data[1] & 0xFF);
-                    
-                    if(size > 0){
                         
-                        for(int i = 0; i < size - 5; i++){
-                            data2[i] = data[i+3];
-                        }
-                        
-                        for(int i = size - 5; i < data2.length; i++){
-                            data2[i] = '\0';
-                        }
-                        
-                        crc = server.CRC16(data, size-2);
-                        
-                        crcValue = data[size - 2] & 0xFF;
-                        crcValue = crcValue << 8;
-                        crcValue = crcValue | (data[size - 1] & 0xFF);
-                        
-                        if(crcValue == crc){
-                            manager.getCommand(data[2]).process(data2);
-                        }else{
-                            //TODO: criar else.
-                        }
-                    }else{
-                        server.interruptServer();
-                        exit = true;
+                    for(int i = 0; i < receivedBytes - 1; i++){
+                        data2[i] = data[i+1];
                     }
+
+                    for(int i = receivedBytes - 1; i < data2.length; i++){
+                        data2[i] = '\0';
+                    }
+                    
+                    manager.getCommand(data[0]).process(data2);
+                    
                 }else if (receivedBytes < 0 || !socket.isConnected()){
                     server.interruptServer();
                     exit = true;

@@ -176,25 +176,10 @@ public final class Client implements Runnable{
     
     public void send(byte[] msg){
         try{
-            int crc;
-            int size = 0;
-            
-            size = (msg[0] & 0xFF) << 8;
-            size = size | (msg[1] & 0xFF);
-            size += 2;
-            msg[0] = (byte)((size >> 8) & 0xFF);
-            msg[1] = (byte)(size & 0xFF);
-            
-            crc = CRC16(msg, size - 2);
-            msg = Arrays.copyOf(msg, size);
-            
-            msg[size - 2] = (byte)((crc >> 8) & 0xFF);
-            msg[size - 1] = (byte)(crc & 0xFF);
-            
             this.queue.put(msg);
             
         }catch(InterruptedException e){
-            
+            interruptClient();
         }
     }
     

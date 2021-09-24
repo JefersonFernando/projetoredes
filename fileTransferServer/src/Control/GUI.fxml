@@ -55,8 +55,8 @@
             <Circle fx:id="sendError" fill="RED" layoutX="295.0" layoutY="381.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
             <ProgressIndicator fx:id="sendIndicator" layoutX="270.0" layoutY="371.0" progress="0.0" />
             <TextField fx:id="receiveRequest" editable="false" layoutX="65.0" layoutY="448.0" prefHeight="25.0" prefWidth="291.0" />
-            <Button fx:id="acceptButton" layoutX="65.0" layoutY="483.0" mnemonicParsing="false" text="Aceitar" />
-            <Button fx:id="rejectButton" layoutX="131.0" layoutY="483.0" mnemonicParsing="false" text="Recusar" />
+            <Button fx:id="acceptButton" layoutX="65.0" layoutY="483.0" mnemonicParsing="false" text="Aceitar" onAction="#handleAcceptButton"/>
+            <Button fx:id="rejectButton" layoutX="131.0" layoutY="483.0" mnemonicParsing="false" text="Recusar" onAction="#handleRejectButton"/>
             <Circle fx:id="receiveError" fill="RED" layoutX="222.0" layoutY="496.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
             <ProgressIndicator fx:id="receiveIndicator" layoutX="197.0" layoutY="483.0" progress="0.0" />
          </children>

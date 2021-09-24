@@ -15,13 +15,16 @@ import java.util.Arrays;
 public final class StartCommand extends BasicCommand{
     
     private static StartCommand instance = null;
-    public GUIController interfaceController = null;
     private static final OptionCommands command = OptionCommands.START;
+    private ReceiveCommand receiveCommand = null;
+    private SendCommand sendCommand = null;
     private File file = null;
     
     private StartCommand(){
         this.server = Server.getInstance();
         this.client = Client.getInstance();
+        this.receiveCommand = ReceiveCommand.getInstance();
+        this.sendCommand = SendCommand.getInstance();
     }
     
     public static StartCommand getInstance(){
@@ -31,6 +34,7 @@ public final class StartCommand extends BasicCommand{
         return instance;
     }
     
+    @Override
     void setInterfaceController(GUIController controller){
         interfaceController = controller;
     }
@@ -41,16 +45,14 @@ public final class StartCommand extends BasicCommand{
             if(file != null){
                 byte[] msg = new byte[1024];
                 
-                msg[0] = 0x00;
-                msg[1] = 0x00;
-                msg[2] = (byte)command.getValue();
+                msg[0] = (byte)command.getValue();
                 
-                msg[3] = 0x00;
+                msg[1] = 0x00;
                 
                 byte[] name = file.getName().getBytes();
-                msg[4] = (byte)name.length;
+                msg[2] = (byte)name.length;
                 
-                int index = 5;
+                int index = 3;
                 
                 for(int i = 0; i<name.length; i++){
                     msg[index] = name[i];
@@ -66,14 +68,12 @@ public final class StartCommand extends BasicCommand{
                     fileSize >>= 8;
                 }
                 index+=8;
-                
-                msg[0] = (byte)((index >> 8) & 0xFF);
-                msg[1] = (byte)(index & 0xFF);
+                byte[] finalMsg = Arrays.copyOfRange(msg, 0, index);
                 
                 if(server.isConnected()){
-                    server.send(msg);
+                    server.send(finalMsg);
                 }else if(client.isConnected()){
-                    client.send(msg);
+                    client.send(finalMsg);
                 }else{
                     server.interruptServer();
                 }
@@ -81,6 +81,7 @@ public final class StartCommand extends BasicCommand{
         }
     }
     
+    @Override
     public void process(byte[] bytes){
         int err = bytes[0];
         
@@ -99,7 +100,7 @@ public final class StartCommand extends BasicCommand{
             
             long sizeFile = 0;
             
-            for(int i = 7; i >= 0; i--){
+            for(int i = sizeLen - 1; i >= 0; i--){
                 sizeFile |= ((bytes[index] & 0xFF) << 8*i);
                 index++;
             }

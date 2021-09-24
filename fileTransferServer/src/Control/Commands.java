@@ -45,6 +45,8 @@ public class Commands{
     private Commands(){
         commands = new HashMap<>();
         commands.put(OptionCommands.START, StartCommand.getInstance());
+        commands.put(OptionCommands.RECEIVE, ReceiveCommand.getInstance());
+        commands.put(OptionCommands.SEND, SendCommand.getInstance());
     }
     
     public static Commands getInstance(){

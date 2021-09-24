@@ -5,20 +5,16 @@
  */
 package Control;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import java.io.File;
 import java.util.regex.Pattern;
 import javafx.stage.FileChooser;
-import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -47,6 +43,11 @@ public class GUIController {
     private Server server = null;
     private Client client = null;
     private StartCommand startCommand = null;
+    private ReceiveCommand receiveCommand = null;
+    private SendCommand sendCommand = null;
+    
+    private String fileName = null;
+    private long fileSize = 0;
     
     public void initialize(){
         selector.getItems().add("Servidor");
@@ -55,9 +56,13 @@ public class GUIController {
         server = Server.getInstance();
         client = Client.getInstance();
         startCommand = StartCommand.getInstance();
+        receiveCommand = ReceiveCommand.getInstance();
+        sendCommand = SendCommand.getInstance();
         server.setInterfaceController(this);
         client.setInterfaceController(this);
         startCommand.setInterfaceController(this);
+        receiveCommand.setInterfaceController(this);
+        sendCommand.setInterfaceController(this);
     }
     
     public void disconnectedStatus(){
@@ -153,7 +158,7 @@ public class GUIController {
     
     public String getIp(){
         String ip = ipField.getText();
-        if(ip != null && checkIp(ip)){
+        if(ip != null){
             return ip;
         }
         return "-";
@@ -197,16 +202,62 @@ public class GUIController {
         
         FileChooser fc = new FileChooser();
         
+        sendIndicator.setOpacity(1);
+        sendIndicator.setProgress(0);
+        
         File file = fc.showOpenDialog(null);
         if(file != null){
+            sendCommand.setFileConfig(file.getAbsolutePath(), file.length());
             start.feed(file.getAbsolutePath());
         }
     }
     
+    public void handleAcceptButton(){
+        receiveIndicator.setOpacity(1);
+        receiveIndicator.setProgress(0);
+        byte err = 0x00;
+        
+        JFileChooser fc = new JFileChooser();
+        fc.setSelectedFile(new File(fileName));
+        fc.showSaveDialog(null);
+        receiveCommand.setFileConfig(fc.getSelectedFile(), fileSize);
+        receiveCommand.feed(err);
+    }
+    
+    public void handleRejectButton(){
+        byte err = (byte) -1;
+        receiveCommand.feed(err);
+        
+        receiveCommand.interruptFileTransfer();
+        
+        this.fileName = null;
+        this.fileSize = 0;
+        
+        connectedStatus();
+    }
+    
     public void transferRequest(String fileName, long fileSize){
+        String sizeType;
+        
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+        
+        if(fileSize < 1024){
+            sizeType = "Bytes";
+        }else if(fileSize < Math.pow(1024, 2)){
+            fileSize /= 1024;
+            sizeType = "KB";
+        }else if(fileSize < Math.pow(1024, 3)){
+            fileSize /= Math.pow(1024, 2);
+            sizeType = "MB";
+        }else{
+            fileSize /= Math.pow(1024, 3);
+            sizeType = "GB";
+        }
+        
         receiveRequest.setOpacity(1);
         receiveRequest.clear();
-        receiveRequest.appendText("Deseja receber " + fileName + "?" + fileSize + "Bytes");
+        receiveRequest.appendText("Deseja receber " + fileName +  "? " + fileSize + sizeType);
         
         acceptButton.setOpacity(1);
         acceptButton.setDisable(false);

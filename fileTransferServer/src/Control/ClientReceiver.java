@@ -43,10 +43,9 @@ public final class ClientReceiver implements Runnable{
         ByteBuffer buff = ByteBuffer.allocate(65536);
         byte[] data2 = new byte[65536];
         byte[] data;
-        int size, crc;
         
         Commands manager = Commands.getInstance();
-        long crcValue;
+        
         int receivedBytes;
         
         while(!exit){
@@ -56,35 +55,17 @@ public final class ClientReceiver implements Runnable{
                 if(receivedBytes > 0){
                     data = buff.array();
                     buff.clear();
-                    
-                    size = ((data[0] & 0xFF) << 8);
-                    size = (size | (data[1] & 0xFF));
-                    
-                    if(size > 0){
                         
-                        for(int i = 0; i < size - 5; i++){
-                            data2[i] = data[i+3];
-                        }
-                        
-                        for(int i = size - 5; i < data2.length; i++){
-                            data2[i] = '\0';
-                        }
-                        
-                        crc = client.CRC16(data, size-2);
-                        
-                        crcValue = data[size - 2] & 0xFF;
-                        crcValue = crcValue << 8;
-                        crcValue = crcValue | (data[size - 1] & 0xFF);
-                        
-                        if(crcValue == crc){
-                            manager.getCommand(data[2]).process(data2);
-                        }else{
-                            //TODO: criar else.
-                        }
-                    }else{
-                        client.interruptClient();
-                        exit = true;
+                    for(int i = 0; i < receivedBytes - 1; i++){
+                        data2[i] = data[i+1];
                     }
+
+                    for(int i = receivedBytes - 1; i < data2.length; i++){
+                        data2[i] = '\0';
+                    }
+                    
+                    manager.getCommand(data[0]).process(data2);
+                    
                 }else if (receivedBytes < 0 || !socket.isConnected()){
                     client.interruptClient();
                     exit = true;
