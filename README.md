@@ -8,7 +8,7 @@
 </p>
 
 # Resumo
-O projeto trata-se de um sistema de transferência de arquivos, havendo no mesmo sistema, a possibilidade de seleção entre Servidor e Cliente. Tal sistema, permite que haja a transferência bilateral de arquivos, desde que a solicitação seja aceitada.
+O projeto trata-se de um sistema de transferência de arquivos, havendo no mesmo sistema, a possibilidade de seleção entre Servidor e Cliente. Tal sistema, permite que haja a transferência bilateral de arquivos, desde que a solicitação seja aceita.
 <br>
 O projeto foi projetado e desenvolvido com um protocolo definido de transferência de dados, desse modo, ambos os dispositivos podem enviar dados um para o outro ao mesmo tempo, sem haver interferência na integridade dos dados dos arquivos, bem como haver a inserção de novos comandos para outras funcionalidades futuras.
 
